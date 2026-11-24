@@ -1,0 +1,7 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { prisma } from "@/lib/prisma";
+import { requireRoles } from "@/lib/guard";
+const schema=z.object({nis:z.string().trim().min(1).max(40).optional(),nisn:z.string().trim().max(40).optional().nullable(),name:z.string().trim().min(2).max(120).optional(),classId:z.string().min(1).optional(),qrValue:z.string().min(1).max(2048).optional(),gender:z.string().optional().nullable(),phone:z.string().optional().nullable(),address:z.string().optional().nullable(),photoUrl:z.string().url().optional().nullable(),status:z.enum(["ACTIVE","INACTIVE","GRADUATED"]).optional()});
+export async function PATCH(req:Request,{params}:{params:Promise<{id:string}>}){const g=await requireRoles(["ADMIN"]);if(g.response)return g.response;try{const {id}=await params;const d=schema.parse(await req.json());const student=await prisma.student.update({where:{id},data:d});return NextResponse.json({student});}catch(e){return NextResponse.json({error:e instanceof z.ZodError?e.issues[0]?.message:"Gagal mengubah siswa. Pastikan data unik."},{status:400});}}
+export async function DELETE(_:Request,{params}:{params:Promise<{id:string}>}){const g=await requireRoles(["ADMIN"]);if(g.response)return g.response;const {id}=await params;await prisma.student.update({where:{id},data:{status:"INACTIVE"}});return NextResponse.json({ok:true,message:"Siswa dinonaktifkan."});}
