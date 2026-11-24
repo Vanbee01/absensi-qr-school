@@ -7,10 +7,30 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role { ADMIN TEACHER STUDENT }
-enum StudentStatus { ACTIVE INACTIVE GRADUATED }
-enum AttendanceStatus { PRESENT LATE PERMISSION SICK ABSENT }
-enum SessionType { CHECK_IN CHECK_OUT }
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+enum StudentStatus {
+  ACTIVE
+  INACTIVE
+  GRADUATED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  LATE
+  PERMISSION
+  SICK
+  ABSENT
+}
+
+enum SessionType {
+  CHECK_IN
+  CHECK_OUT
+}
 
 model User {
   id           String   @id @default(cuid())
@@ -26,23 +46,23 @@ model User {
 }
 
 model ClassRoom {
-  id          String    @id @default(cuid())
-  name        String
-  major       String?
-  grade       String?
-  students    Student[]
-  homeroomId  String?
-  homeroom    Teacher?  @relation(fields: [homeroomId], references: [id])
-  createdAt   DateTime  @default(now())
+  id         String    @id @default(cuid())
+  name       String
+  major      String?
+  grade      String?
+  students   Student[]
+  homeroomId String?
+  homeroom   Teacher?  @relation(fields: [homeroomId], references: [id])
+  createdAt  DateTime  @default(now())
   @@unique([name, major])
 }
 
 model Teacher {
-  id        String     @id @default(cuid())
-  userId    String     @unique
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  employeeNo String?  @unique
-  classes   ClassRoom[]
+  id         String     @id @default(cuid())
+  userId     String     @unique
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  employeeNo String?    @unique
+  classes    ClassRoom[]
 }
 
 model Student {
@@ -80,20 +100,20 @@ model AttendanceSession {
 }
 
 model Attendance {
-  id          String           @id @default(cuid())
+  id          String            @id @default(cuid())
   studentId   String
-  student     Student          @relation(fields: [studentId], references: [id])
+  student     Student           @relation(fields: [studentId], references: [id])
   sessionId   String
   session     AttendanceSession @relation(fields: [sessionId], references: [id])
-  date        DateTime         @db.Date
+  date        DateTime          @db.Date
   status      AttendanceStatus
-  scannedAt   DateTime         @default(now())
-  method      String           @default("QR")
+  scannedAt   DateTime          @default(now())
+  method      String            @default("QR")
   recordedBy  String?
   note        String?
   logs        AttendanceLog[]
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
   @@unique([studentId, sessionId, date])
   @@index([date, status])
   @@index([sessionId, date])
